@@ -1,0 +1,290 @@
+---
+title: "Mean BAI all QURU sites"
+author: "R Stern"
+date: "April 7, 2018"
+output: html_document
+---
+Read in all CSV files from each site, BAI:
+```{r}
+library(dplyr)
+library(ggplot2)
+
+setwd("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16")
+
+choose.files()
+
+#NB
+nb.bai.trunc <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\NB\\QURU_nb_bai_trunc.csv")
+head(nb.bai.trunc)
+class(nb.bai.trunc$year)
+class(nb.bai.trunc$nb_bai)
+
+#filter to 1935
+nb.bai.trunc2 <- filter(nb.bai.trunc, year>1934)
+head(nb.bai.trunc2)
+
+#find slope, intercept
+coef(lm(nb_bai ~ year, data = nb.bai.trunc2)) #slope= 0.09450383 
+
+#plot to check
+ggplot() + geom_line (data=nb.bai.trunc2, aes(x=year, y=nb_bai)) + 
+  geom_abline(intercept = -168.29513244, slope =0.09450383 ) +
+   theme_classic() 
+
+#Dome1
+dome1.bai.trunc <-  read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\Dome1\\dome1_BAI_Trunc.csv")
+head(dome1.bai.trunc)
+
+#filter to 1935
+dome1.bai.trunc2 <- filter(dome1.bai.trunc, year>1934)
+head(dome1.bai.trunc2)
+
+#find slope, intercept
+coef(lm(dome1_bai ~ year, data = dome1.bai.trunc2)) #slope= 0.09515006 
+
+#plot to check
+ggplot() + geom_line (data=dome1.bai.trunc2, aes(x=year, y=dome1_bai)) + 
+  geom_abline(intercept = -178.79875010, slope = 0.09515006) +
+   theme_classic() 
+
+#Dome2
+dome2.bai.trunc <-  read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\Dome2\\dome2_BAI_Trunc.csv")
+head(dome2.bai.trunc)
+
+#filter to 1935
+dome2.bai.trunc2 <- filter(dome2.bai.trunc, year>1934)
+head(dome2.bai.trunc2)
+
+#find slope, intercept
+coef(lm(dome2_bai ~ year, data = dome2.bai.trunc2)) #slope=  0.03172025 
+
+#plot to check
+ggplot() + geom_line (data=dome2.bai.trunc2, aes(x=year, y=dome2_bai)) + 
+  geom_abline(intercept =-54.28975435  , slope =0.03172025  ) +
+   theme_classic() 
+
+#Gosh1
+gosh1.bai.trunc<- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\GOSH1\\QURU_gosh1_bai_trunc.csv")
+head(gosh1.bai.trunc)
+
+#filter to 1935
+gosh1.bai.trunc2 <- filter(gosh1.bai.trunc, year>1934)
+head(gosh1.bai.trunc2)
+
+#find slope, intercept
+coef(lm(gosh1_bai ~ year, data = gosh1.bai.trunc2)) #slope= 0.0724083 
+
+#plot to check
+ggplot() + geom_line (data=gosh1.bai.trunc2, aes(x=year, y=gosh1_bai)) + 
+  geom_abline(intercept =-124.4299742  , slope = 0.0724083) +
+   theme_classic() 
+
+#B13
+b13.bai.trunc <- read.csv( "C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\HHSB13H02\\QURU_B13_bai_trunc.csv")
+head(b13.bai.trunc)
+
+#filter to 1935
+b13.bai.trunc2 <- filter(b13.bai.trunc, year>1934)
+head(b13.bai.trunc2)
+
+#find slope, intercept
+coef(lm(b13_bai ~ year, data = b13.bai.trunc2)) #slope= 0.2281233 
+
+#plot to check
+ggplot() + geom_line (data=b13.bai.trunc2, aes(x=year, y=b13_bai)) + 
+  geom_abline(intercept = -436.5876666, slope = 0.2281233 ) +
+   theme_classic() 
+
+#C12
+c12.bai.trunc <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\HHSC12F02\\QURU_C12_bai_trunc.csv")
+head(c12.bai.trunc)
+
+#filter to 1935
+c12.bai.trunc2 <- filter(c12.bai.trunc, year>1934)
+head(c12.bai.trunc2)
+
+#find slope, intercept
+coef(lm(C12_bai ~ year, data = c12.bai.trunc2)) #slope=0.1373237   
+
+#plot to check
+ggplot() + geom_line (data=c12.bai.trunc2, aes(x=year, y=C12_bai)) + 
+  geom_abline(intercept = -257.8354355, slope = 0.1373237) +
+   theme_classic() 
+
+#IBR
+ibr.bai.trunc <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\IBR\\QURU_ibr_bai_trunc.csv")
+head(ibr.bai.trunc)
+#filter to 1935
+ibr.bai.trunc2 <- filter(ibr.bai.trunc, year>1934)
+head(ibr.bai.trunc2)
+
+#find slope, intercept
+coef(lm(ibr_bai ~ year, data = ibr.bai.trunc2)) #slope= 0.2288715 
+
+#plot to check
+ggplot() + geom_line (data=ibr.bai.trunc2, aes(x=year, y=ibr_bai)) + 
+  geom_abline(intercept = -422.7503815 , slope =0.2288715) +
+   theme_classic() 
+
+#LEMP11
+lemp11.bai.trunc <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\LEMP11\\QURU_lemp11_bai_trunc.csv")
+head(lemp11.bai.trunc)
+
+#filter to 1935
+lemp11.bai.trunc2 <- filter(lemp11.bai.trunc, year>1934)
+head(lemp11.bai.trunc2)
+
+#find slope, intercept
+coef(lm(lemp11_bai ~ year, data = lemp11.bai.trunc2)) #slope=0.09070819   
+
+#plot to check
+ggplot() + geom_line (data=lemp11.bai.trunc2, aes(x=year, y=lemp11_bai)) + 
+  geom_abline(intercept = -161.81557752, slope =0.09070819) +
+   theme_classic() 
+
+#LEMP13
+lemp13.bai.trunc <- read.csv( "C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\LEMP13\\QURU_lemp13_bai_trunc.csv")
+head(lemp13.bai.trunc)
+
+#filter to 1935
+lemp13.bai.trunc2 <- filter(lemp13.bai.trunc, year>1934)
+head(lemp13.bai.trunc2)
+
+#find slope, intercept
+coef(lm(lemp13_bai ~ year, data = lemp13.bai.trunc2)) #slope= 0.1347039 
+
+#plot to check
+ggplot() + geom_line (data=lemp13.bai.trunc2, aes(x=year, y=lemp13_bai)) + 
+  geom_abline(intercept = -250.5305061, slope =0.1347039) +
+   theme_classic() 
+
+#RR
+rr.bai.trunc <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\RR\\QURU_rr_bai_trunc.csv")
+head(rr.bai.trunc)
+
+#filter to 1935
+rr.bai.trunc2 <- filter(rr.bai.trunc, year>1934)
+head(rr.bai.trunc2)
+
+#find slope, intercept
+coef(lm(rr_bai ~ year, data = rr.bai.trunc2)) #slope=0.2653169   
+
+#plot to check
+ggplot() + geom_line (data=rr.bai.trunc2, aes(x=year, y=rr_bai)) + 
+  geom_abline(intercept = -498.5034804, slope =0.2653169) +
+   theme_classic() 
+
+#STAL
+stal.bai.trunc <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\STAL\\QURU_stal_bai_trunc.csv")
+head(stal.bai.trunc)
+
+#filter to 1935
+stal.bai.trunc2 <- filter(stal.bai.trunc, year>1934)
+head(stal.bai.trunc2)
+
+#find slope, intercept
+coef(lm(stal_bai ~ year, data = stal.bai.trunc2)) #slope= 0.160607 
+
+#plot to check
+ggplot() + geom_line (data=stal.bai.trunc2, aes(x=year, y=stal_bai)) + 
+  geom_abline(intercept =-304.427476, slope =0.160607 ) +
+   theme_classic() 
+
+```
+
+Create a bai_all data frame with bai residual chronologues of all QURU sites
+
+The merge argument only takes two values as input, so you have to do them seperately
+
+Start with the oldest site.
+```{r}
+bai_all<- merge(nb.bai.trunc, dome1.bai.trunc, by="year", all=TRUE)
+tail(bai_all)
+
+bai_all2<- merge(bai_all, dome2.bai.trunc, by="year", all=TRUE)
+tail(bai_all2)
+
+bai_all3 <- merge(bai_all2, gosh1.bai.trunc, by="year", all=TRUE)
+tail(bai_all3)
+
+bai_all4 <- merge(bai_all3, b13.bai.trunc, all=TRUE)
+tail(bai_all4)
+
+bai_all5 <- merge (bai_all4, c12.bai.trunc, all=TRUE)
+tail (bai_all5)
+
+bai_all6 <- merge(bai_all5, ibr.bai.trunc, all=TRUE)
+tail(bai_all6)
+
+bai_all7 <- merge(bai_all6, lemp11.bai.trunc, all=TRUE)
+tail(bai_all7)
+
+bai_all8 <- merge(bai_all7, lemp13.bai.trunc, all=TRUE)
+tail(bai_all8)
+
+bai_all9 <- merge(bai_all8, rr.bai.trunc, by="year", all=TRUE)
+tail(bai_all9)
+
+bai_all10 <- merge(bai_all9, stal.bai.trunc, by="year", all=TRUE)
+tail(bai_all10)
+
+#truncate to the common period (1935-2014)
+nrow(bai_all10)
+
+quru_bai_all10 <- bai_all10 [55:134,]
+head(quru_bai_all10)
+tail(quru_bai_all10)
+
+#create a column with total sample depth:
+quru_bai_all10$tot.s.dep<- rowSums(quru_bai_all10[,c("stal.s.dep", "b13.s.dep", "dome1.s.dep", "dome2.s.dep", "gosh1.s.dep", "C12.s.dep", "ibr.s.dep", "lemp11.s.dep", "lemp13.s.dep", "nb.s.dep", "rr.s.dep")], na.rm=T)
+head(quru_bai_all10)
+
+#create a column with mean bai (growth) for all sites:
+quru_bai_all10$mean.bai <- rowMeans(quru_bai_all10[,c("stal_bai", "b13_bai", "dome1_bai", "dome2_bai", "gosh1_bai", "C12_bai", "ibr_bai", "lemp11_bai", "lemp13_bai", "nb_bai", "rr_bai")], na.rm = T)
+head(quru_bai_all10)
+tail(quru_bai_all10)
+tail(quru_bai_all10$mean.bai)
+
+#write csv
+write.csv(quru_bai_all10, "C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\bai_all11sites.csv", row.names = FALSE)
+
+#creat df with just mean and sample depth
+quru_bai_all_mean<- quru_bai_all10[,c("year", "mean.bai", "tot.s.dep")]
+head(quru_bai_all_mean)
+tail(quru_bai_all_mean)
+
+write.csv(quru_bai_all_mean, "C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU_mean_only_bai.csv", row.names = FALSE)
+
+```
+
+
+Plotting the mean bai chronology:
+```{r}
+
+ggplot() + geom_line (data=quru_bai_all_mean, aes(x=year, y=mean.bai)) + 
+     theme_classic() 
+par(mfrow=c(1,1))
+
+head(quru_bai_all_mean)
+class(quru_bai_all_mean$mean.bai)
+
+pettitt.test(quru_bai_all_mean$mean.bai)
+
+#filter to 1970
+quru_bai_all_mean3<- filter(quru_bai_all_mean, year>1965)
+head(quru_bai_all_mean3)
+
+pettitt.test(quru_bai_all_mean3$mean.bai)
+
+#plot the chronology along with sample depth
+crn.plot(bai_all10,main = "QURU BAI all sites", 
+         samp.depth.col='grey90',
+         samp.depth.border.col='grey80')
+
+#create plot using csv of chronology:
+quru.rwi <- crn.plot(vt_quru_chron, 
+         samp.depth.col='grey90',
+         samp.depth.border.col='grey80', xlab ="year")
+
+```
+

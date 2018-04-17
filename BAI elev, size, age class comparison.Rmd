@@ -1,0 +1,191 @@
+---
+title: "BAI elev classes"
+author: "R Stern"
+date: "April 10, 2018"
+output: html_document
+---
+
+Elevation
+```{r}
+library(dplR)
+
+choose.files()
+quru_elev <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Excel Files\\QURU Sites Elevation classes.csv")
+head(quru_elev)
+
+t.test(BAI_slope~Elevation.Class, data = quru_elev)
+#pvalue=0.04, t=2.47
+
+scatter.smooth(x=quru_elev$Elevation..m., y=quru_elev$BAI.slope.1935.2014)
+
+par(mfrow=c(1, 2))  # divide graph area in 2 columns
+
+boxplot(quru_elev$Elevation..m., main="Elev", sub=paste("Outlier rows: ", boxplot.stats(quru_elev$Elevation..m.)$out)) #boxplot for elevation
+
+boxplot(quru_elev$BAI.slope.1935.2014, main="BAI Slope", sub=paste("Outlier rows: ", boxplot.stats(quru_elev$BAI.slope.1935.2014)$out)) #boxplot for slope
+
+#Build a linear model
+elev.slope<- lm(BAI.slope.1935.2014~Elevation.Class, data = quru_elev)  
+
+print(elev.slope)
+#slope = 0.19030 -0.09232∗elev
+
+summary(elev.slope)#significant at the 0.05 level. p=0.03, t=-2.582
+
+```
+
+
+Elevation- sites divided into top third and bottom third
+```{r}
+
+#filter to just include the top and bottom third of the sites
+quru_elev2 <- quru_elev[quru_elev$Top.and.bottom.third %in% c("Bottom", "Top"), ] 
+head(quru_elev2)
+
+t.test(BAI_slope~Top.and.bottom.third, data = quru_elev2)
+#pvalue=0.03 
+
+scatter.smooth(x=quru_elev2$Elevation..m., y=quru_elev2$BAI_slope)
+
+
+par(mfrow=c(1, 2))  # divide graph area in 2 columns
+
+boxplot(quru_elev2$mean_elev, main="elev", sub=paste("Outlier rows: ", boxplot.stats(quru_elev2$mean_elev)$out)) #boxplot for elev
+
+boxplot(quru_elev2$BAI.slope, main="BAI Slope", sub=paste("Outlier rows: ", boxplot.stats(quru_elev2$BAI_slope)$out)) #boxplot for slope
+
+#Build a linear model
+elev2.slope<- lm(BAI_slope~Elevation..m., data = quru_elev2)  
+
+print(elev2.slope)
+#slope = 0.240759  -0.000445∗elev
+
+summary(elev2.slope)#p=0.08, so better to go with top and bottom halves, since that shows significance 
+
+```
+
+
+
+Size- sites divided in half
+```{r}
+choose.files()
+
+quru_size <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Excel Files\\QURU Sites size classes.csv")
+head(quru_size)
+
+t.test(BAI.slope~size_class, data = quru_size)
+#pvalue=0.7
+
+scatter.smooth(x=quru_size$mean_size, y=quru_size$BAI.slope)
+
+
+par(mfrow=c(1, 2))  # divide graph area in 2 columns
+
+boxplot(quru_size$mean_size, main="size", sub=paste("Outlier rows: ", boxplot.stats(quru_size$mean_size)$out)) #boxplot for size
+
+boxplot(quru_size$BAI.slope, main="BAI Slope", sub=paste("Outlier rows: ", boxplot.stats(quru_size$BAI.slope)$out)) #boxplot for slope
+
+#Build a linear model
+size.slope<- lm(BAI.slope~mean_size, data = quru_size)  
+
+print(size.slope)
+#slope = -0.074652 +0.004797∗size
+
+summary(size.slope)#Not significant. p=0.12
+
+```
+
+Size- sites divided into top third and bottom third
+```{r}
+choose.files()
+
+quru_size <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Excel Files\\QURU Sites size classes.csv")
+head(quru_size)
+
+#filter to just include the top and bottom third of the sites
+quru_size2 <- quru_size[quru_size$Smallest.Largest.third %in% c("Smallest", "Largest"), ] 
+head(quru_size2)
+
+t.test(BAI.slope~Smallest.Largest.third, data = quru_size2)
+#pvalue=0.19 not significnat
+
+scatter.smooth(x=quru_size2$mean_size, y=quru_size2$BAI.slope)
+
+
+par(mfrow=c(1, 2))  # divide graph area in 2 columns
+
+boxplot(quru_size2$mean_size, main="size", sub=paste("Outlier rows: ", boxplot.stats(quru_size2$mean_size)$out)) #boxplot for size
+
+boxplot(quru_size2$BAI.slope, main="BAI Slope", sub=paste("Outlier rows: ", boxplot.stats(quru_size2$BAI.slope)$out)) #boxplot for slope
+
+#Build a linear model
+size2.slope<- lm(BAI.slope~mean_size, data = quru_size2)  
+
+print(size2.slope)
+#slope = -0.112442 +0.005786∗size
+
+summary(size2.slope)#Not significant. p=0.13
+
+```
+
+
+Age- sites divided in half
+```{r}
+choose.files()
+
+quru_age <- read.csv( "C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Excel Files\\QURU Sites Age classes for R.csv")
+head(quru_age)
+
+t.test(BAI_slope~age_class_median, data = quru_age)
+#pvalue=0.15 t= -1.579 not sig 
+
+scatter.smooth(x=quru_age$mean_age, y=quru_age$BAI_slope)
+
+
+par(mfrow=c(1, 2))  # divide graph area in 2 columns
+
+boxplot(quru_age$mean_age_median, main="age", sub=paste("Outlier rows: ", boxplot.stats(quru_age$mean_age_median)$out)) #boxplot for age
+
+boxplot(quru_age$BAI.slope, main="BAI Slope", sub=paste("Outlier rows: ", boxplot.stats(quru_age$BAI.slope)$out)) #boxplot for slope
+
+#Build a linear model
+age.slope<- lm(BAI_slope~mean_age, data = quru_age)  
+
+print(age.slope)
+#slope =  0.31685 - 0.00167 ∗age
+
+summary(age.slope)#Not significant. p=0.37
+
+```
+
+
+
+age- sites divided into top third and bottom third
+```{r}
+
+#filter to just include the top and bottom third of the sites
+quru_age2 <- quru_age[quru_age$oldest_youngest_third %in% c("Youngest", "Oldest"), ] 
+head(quru_age2)
+
+t.test(BAI_slope~oldest_youngest_third, data = quru_age2)
+#pvalue=0.11 not significnat
+
+scatter.smooth(x=quru_age2$mean_age, y=quru_age2$BAI_slope)
+
+
+#par(mfrow=c(1, 2))  # divide graph area in 2 columns
+
+#boxplot(quru_age2$mean_age, main="age", sub=paste("Outlier rows: ", boxplot.stats(quru_age2$mean_age)$out)) #boxplot for age
+
+#boxplot(quru_age2$BAI.slope, main="BAI Slope", sub=paste("Outlier rows: ", boxplot.stats(quru_age2$BAI.slope)$out)) #boxplot for slope
+
+#Build a linear model
+age2.slope<- lm(BAI_slope~mean_age, data = quru_age2)  
+
+plot(BAI_slope~mean_age, data = quru_age2) 
+
+print(age2.slope)
+#slope = 0.394417- 0.002381∗age
+
+summary(age2.slope)#marginally significant, p=0.07, t=-2.40. Older sites have marginally lower growth.
+```
