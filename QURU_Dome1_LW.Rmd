@@ -1,0 +1,345 @@
+---
+title: "QURU_dome1_lw"
+author: "R Stern"
+date: "March 24,2018"
+output: html_document
+---
+```{r}
+library(graphics)
+library(stats)
+library(utils)
+library(dplR)
+library(ggplot2)
+library(dplyr)
+
+choose.files()
+
+dome1.lw <- read.tucson("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\Dome1\\QURU_DOME1_LATEWOOD.ewr")
+head(dome1.lw)
+tail(dome1.lw)
+
+#average multiple cores of same tree. 
+dome1.ids.percore <- read.ids(dome1.lw, stc = c(0,4,1))
+dome1.ids.percore
+
+dome1.treeMean.lw <- treeMean(dome1.lw, dome1.ids.percore, na.rm=TRUE)
+tail(dome1.treeMean.lw)
+
+#to find out how many trees are at this site:
+ncol(dome1.treeMean.lw)
+
+#For some reason, 2016 is listed, but we cored in 2015. So, remove 2016:
+dome1.treeMean.lw <- dome1.treeMean.lw[ !(rownames(dome1.treeMean.lw) %in% 2016), ]
+tail(dome1.treeMean.lw)
+```
+
+summary statistics
+```{r}
+#conduct summary statistics on RRW per tree (treeMean)
+dome1.treeMean.lw.sum <- summary(dome1.treeMean.lw)
+
+#to get mean lw, SD for lw:
+mean(dome1.treeMean.lw.sum$mean)
+mean(dome1.treeMean.lw.sum$year)
+min(dome1.treeMean.lw.sum$first)
+max(dome1.treeMean.lw.sum$last)
+mean(dome1.treeMean.lw.sum$stdev)
+mean(dome1.treeMean.lw.sum$median)
+mean(dome1.treeMean.lw.sum$ar1)
+
+#average mean sensitivity- there are two measures of sensitivity here (sens1 and sens2).I used sens2. See word doc titled "notes and ideas for red oak manuscript" for more info. 
+mean(dome1.treeMean.lw.sum$sens1) #0.342
+mean(dome1.treeMean.lw.sum$sens2) #0.306
+
+#to get mean interseries correlation or original RRW rwl
+mean(interseries.cor(dome1.lw)[, 1])
+
+plot(dome1.treeMean.lw, plot.type="spag")
+
+```
+
+Detrend with a spline
+```{r}
+dome1.lw.spline <- detrend(rwl = dome1.treeMean.lw, method = "Spline")
+tail(dome1.lw.spline)
+
+library(doParallel)
+
+#check stats/EPS of spline method
+#read in ids based on treeMean
+dome1.ids.treeMean.lw <- read.ids(dome1.treeMean.lw,stc = c(0,4,1))
+head( dome1.ids.treeMean.lw)
+
+dome1.stats.lw.spline <- rwi.stats.running(dome1.lw.spline, 
+                                           dome1.ids.treeMean.lw,
+                                            window.length = 20)
+dome1.stats.lw.spline 
+
+```
+
+Create site chronology with spline (default spline settings):
+```{r}
+dome1.lw.spline.crn <- chron(dome1.lw.spline, prefix = "DO1", 
+                          biweight = TRUE, 
+                          prewhiten = TRUE)
+head(dome1.lw.spline.crn)
+tail(dome1.lw.spline.crn)
+
+#truncate based on EPS, which for this site was the year 1925:
+nrow(dome1.lw.spline.crn)
+
+dome1.lw.spline.tcrn <- dome1.lw.spline.crn [51:141,]
+head(dome1.lw.spline.tcrn)
+tail(dome1.lw.spline.tcrn)
+
+par(mfrow=c(1,1))
+
+plot(dome1.lw.spline.tcrn,xlab="Year",ylab="RWI") #standardized chronology on top, residual chronology on bottom. Sample depth is trees, not cores.
+
+#remove the standardized chronology to prep for creating CSV
+dome1.lw.spline.tcrn <-dome1.lw.spline.tcrn[-1]
+dome1.lw.spline.tcrn <- cbind(rownames(dome1.lw.spline.tcrn), dome1.lw.spline.tcrn)
+rownames(dome1.lw.spline.tcrn) <- NULL
+colnames(dome1.lw.spline.tcrn) <- c("year","dome1_lwres","dome1.s.dep")
+head(dome1.lw.spline.tcrn)
+tail(dome1.lw.spline.tcrn)
+
+#create CSV file for future reference (so don't have to re-run code every time)
+write.csv(dome1.lw.spline.tcrn, "C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\Dome1\\Residual chronologies\\dome1_lw_defspline_trunc.csv", row.names=FALSE)
+```
+
+Detrend using 20-year spline:
+```{r}
+dome1.lw.spline.20 <-detrend(dome1.treeMean.lw, y.name = names(dome1.treeMean.lw),                make.plot = FALSE, 
+               method = "Spline",
+               nyrs = 20, f = 0.5,
+               verbose = FALSE, return.info = FALSE, span = "cv", bass = 0)
+
+#check stats/EPS of 20-yr spline 
+dome1.lw.spline.20.stats  <- rwi.stats.running(dome1.lw.spline.20,
+                                                dome1.ids.treeMean.lw,
+                                               window.length = 20)
+dome1.lw.spline.20.stats
+```
+
+Create site chronology with 20-year spline:
+```{r}
+dome1.lw.spline.20.crn <- chron(dome1.lw.spline.20, prefix = "DO1", 
+                          biweight = TRUE, 
+                          prewhiten = TRUE)
+head(dome1.lw.spline.20.crn)
+tail(dome1.lw.spline.20.crn)
+
+#truncate based on EPS, which for this site was the year 1925:
+nrow(dome1.lw.spline.20.crn)
+
+dome1.lw.spline.20.tcrn <- dome1.lw.spline.20.crn [51:141,]
+head(dome1.lw.spline.20.tcrn)
+tail(dome1.lw.spline.20.tcrn)
+
+par(mfrow=c(1,1))
+
+plot(dome1.lw.spline.20.tcrn,xlab="Year",ylab="RWI") #standardized chronology on top, residual chronology on bottom. Sample depth is trees, not cores.
+
+#remove the standardized chronology to prep for creating CSV
+dome1.lw.spline.20.tcrn <-dome1.lw.spline.20.tcrn[-1]
+dome1.lw.spline.20.tcrn <- cbind(rownames(dome1.lw.spline.20.tcrn), dome1.lw.spline.20.tcrn)
+rownames(dome1.lw.spline.20.tcrn) <- NULL
+colnames(dome1.lw.spline.20.tcrn) <- c("year","dome1_lwres","dome1.s.dep")
+head(dome1.lw.spline.20.tcrn)
+tail(dome1.lw.spline.20.tcrn)
+
+#create CSV file for future reference (so don't have to re-run code every time)
+write.csv(dome1.lw.spline.20.tcrn, "C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\Dome1\\Residual chronologies\\QURU_dome1_lw_20spline_trunc.csv", row.names=FALSE)
+```
+
+Detrend using a 30 year spline
+```{r}
+dome1.lw.spline.30 <- detrend(dome1.treeMean.lw, y.name = names(dome1.treeMean.lw),                              make.plot = FALSE, 
+                             method = "Spline",
+                             nyrs = 30, f = 0.5,
+                             verbose = FALSE, return.info = FALSE, span = "cv",
+                             bass = 0)
+
+#check stats/EPS of 30-yr spline 
+dome1.lw.spline.30.stats  <- rwi.stats.running(dome1.lw.spline.30,
+                                               dome1.ids.treeMean.lw,
+                                               window.length = 20)
+dome1.lw.spline.30.stats
+```
+
+Create site chronology with 30-year spline:
+```{r}
+dome1.lw.spline.30.crn <- chron(dome1.lw.spline.30, prefix = "DO1", 
+                          biweight = TRUE, 
+                          prewhiten = TRUE)
+head(dome1.lw.spline.30.crn)
+tail(dome1.lw.spline.30.crn)
+
+#truncate based on EPS, which for this site was the year 1925:
+nrow(dome1.lw.spline.30.crn)
+
+dome1.lw.spline.30.tcrn <- dome1.lw.spline.30.crn [51:141,]
+head(dome1.lw.spline.30.tcrn)
+tail(dome1.lw.spline.30.tcrn)
+
+par(mfrow=c(1,1))
+
+plot(dome1.lw.spline.30.tcrn,xlab="Year",ylab="RWI") #standardized chronology on top, residual chronology on bottom. Sample depth is trees, not cores.
+
+#remove the standardized chronology to prep for creating CSV
+dome1.lw.spline.30.tcrn <-dome1.lw.spline.30.tcrn[-1]
+dome1.lw.spline.30.tcrn <- cbind(rownames(dome1.lw.spline.30.tcrn), dome1.lw.spline.30.tcrn)
+rownames(dome1.lw.spline.30.tcrn) <- NULL
+colnames(dome1.lw.spline.30.tcrn) <- c("year","dome1_lwres","dome1.s.dep")
+head(dome1.lw.spline.30.tcrn)
+tail(dome1.lw.spline.30.tcrn)
+
+#create CSV file for future reference (so don't have to re-run code every time)
+write.csv(dome1.lw.spline.30.tcrn, "C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\Dome1\\Residual chronologies\\QURU_dome1_lw_30spline_trunc.csv", row.names=FALSE)
+```
+
+Detrend using a 40 year spline
+```{r}
+dome1.lw.spline.40 <- detrend(dome1.treeMean.lw, y.name = names(dome1.treeMean.lw),
+                              make.plot = FALSE, 
+                              method = "Spline",
+                              nyrs = 40, f = 0.5,
+                              verbose = FALSE, return.info = FALSE, span = "cv",
+                              bass = 0)
+
+#check stats/EPS of 40-yr spline 
+dome1.lw.spline.40.stats  <- rwi.stats.running(dome1.lw.spline.40,
+                                               dome1.ids.treeMean.lw,
+                                               window.length = 20)
+dome1.lw.spline.40.stats
+```
+
+
+Create site chronology with 40-year spline:
+```{r}
+dome1.lw.spline.40.crn <- chron(dome1.lw.spline.40, prefix = "DO1", 
+                          biweight = TRUE, 
+                          prewhiten = TRUE)
+head(dome1.lw.spline.40.crn)
+tail(dome1.lw.spline.40.crn)
+
+#truncate based on EPS, 1925:
+nrow(dome1.lw.spline.40.crn)
+
+dome1.lw.spline.40.tcrn <- dome1.lw.spline.40.crn [51:141,]
+head(dome1.lw.spline.40.tcrn)
+tail(dome1.lw.spline.40.tcrn)
+
+par(mfrow=c(1,1))
+
+plot(dome1.lw.spline.40.tcrn,xlab="Year",ylab="RWI") #standardized chronology on top, residual chronology on bottom. Sample depth is trees, not cores.
+
+#remove the standardized chronology to prep for creating CSV
+dome1.lw.spline.40.tcrn <-dome1.lw.spline.40.tcrn[-1]
+dome1.lw.spline.40.tcrn <- cbind(rownames(dome1.lw.spline.40.tcrn), dome1.lw.spline.40.tcrn)
+rownames(dome1.lw.spline.40.tcrn) <- NULL
+colnames(dome1.lw.spline.40.tcrn) <- c("year","dome1_lwres","dome1.s.dep")
+head(dome1.lw.spline.40.tcrn)
+tail(dome1.lw.spline.40.tcrn)
+
+#create CSV file for future reference (so don't have to re-run code every time)
+write.csv(dome1.lw.spline.40.tcrn, "C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\Dome1\\Residual chronologies\\QURU_dome1_lw_40spline_trunc.csv", row.names=FALSE)
+```
+
+Detrend using a 50 year spline
+```{r}
+dome1.lw.spline.50 <- detrend(dome1.treeMean.lw, y.name = names(dome1.treeMean.lw),
+                              make.plot = FALSE, 
+                              method = "Spline",
+                              nyrs = 50, f = 0.5,
+                              verbose = FALSE, return.info = FALSE, span = "cv",
+                              bass = 0)
+
+#check stats/EPS of 50-yr spline 
+dome1.lw.spline.50.stats  <- rwi.stats.running(dome1.lw.spline.50,
+                                               dome1.ids.treeMean.lw,
+                                               window.length = 20)
+dome1.lw.spline.50.stats
+```
+
+Create site chronology with 50-year spline:
+```{r}
+dome1.lw.spline.50.crn <- chron(dome1.lw.spline.50, prefix = "DO1", 
+                          biweight = TRUE, 
+                          prewhiten = TRUE)
+head(dome1.lw.spline.50.crn)
+tail(dome1.lw.spline.50.crn)
+
+#truncate based on EPS, 1925:
+nrow(dome1.lw.spline.50.crn)
+
+dome1.lw.spline.50.tcrn <- dome1.lw.spline.50.crn [51:141,]
+head(dome1.lw.spline.50.tcrn)
+tail(dome1.lw.spline.50.tcrn)
+
+par(mfrow=c(1,1))
+
+plot(dome1.lw.spline.50.tcrn,xlab="Year",ylab="RWI") #standardized chronology on top, residual chronology on bottom. Sample depth is trees, not cores.
+
+#remove the standardized chronology to prep for creating CSV
+dome1.lw.spline.50.tcrn <-dome1.lw.spline.50.tcrn[-1]
+dome1.lw.spline.50.tcrn <- cbind(rownames(dome1.lw.spline.50.tcrn), dome1.lw.spline.50.tcrn)
+rownames(dome1.lw.spline.50.tcrn) <- NULL
+colnames(dome1.lw.spline.50.tcrn) <- c("year","dome1_lwres","dome1.s.dep")
+head(dome1.lw.spline.50.tcrn)
+tail(dome1.lw.spline.50.tcrn)
+
+#create CSV file for future reference (so don't have to re-run code every time)
+write.csv(dome1.lw.spline.50.tcrn, "C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\Dome1\\Residual chronologies\\QURU_dome1_lw_50spline_trunc.csv", row.names=FALSE)
+```
+
+Detrend using FSS
+```{r}
+#detrend using FSS
+dome1.lw.fss <- detrend(rwl = dome1.treeMean.lw, method = "Friedman")
+tail(dome1.lw.fss)
+
+#check stats/EPS of FSS method
+#read in ids based on treeMean
+dome1.ids.treeMean <- read.ids(dome1.treeMean.lw,stc = c(0,4,1))
+head(dome1.ids.treeMean)
+
+dome1.stats.lw.fss <- rwi.stats.running(dome1.lw.fss, dome1.ids.treeMean.lw,
+                                            window.length = 20)
+
+dome1.stats.lw.fss 
+```
+
+Create site chronology with FSS:
+```{r}
+dome1.lw.fss.crn <- chron(dome1.lw.fss, prefix = "DO1", 
+                          biweight = TRUE, 
+                          prewhiten = TRUE)
+head(dome1.lw.fss.crn)
+tail(dome1.lw.fss.crn)
+
+#truncate based on EPS, which for this site was the year 1925:
+nrow(dome1.lw.fss.crn)
+
+dome1.lw.fss.tcrn <- dome1.lw.fss.crn [51:141,]
+head(dome1.lw.fss.tcrn)
+tail(dome1.lw.fss.tcrn)
+
+par(mfrow=c(1,1))
+
+plot(dome1.lw.fss.tcrn,xlab="Year",ylab="RWI") #standardized chronology on top, residual chronology on bottom. Sample depth is trees, not cores.
+
+#remove the standardized chronology to prep for creating CSV
+dome1.lw.fss.tcrn <-dome1.lw.fss.tcrn[-1]
+dome1.lw.fss.tcrn <- cbind(rownames(dome1.lw.fss.tcrn), dome1.lw.fss.tcrn)
+rownames(dome1.lw.fss.tcrn) <- NULL
+colnames(dome1.lw.fss.tcrn) <- c("year","dome1_lwres","dome1.s.dep")
+head(dome1.lw.fss.tcrn)
+tail(dome1.lw.fss.tcrn)
+
+#create CSV file for future reference (so don't have to re-run code every time)
+write.csv(dome1.lw.fss.tcrn, "C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\Dome1\\Residual chronologies\\dome1_lw_fss_trunc.csv", row.names=FALSE)
+```
+
+

@@ -1,0 +1,169 @@
+---
+title: "QURU_dome"
+author: "R Stern"
+date: "February 15, 2017"
+output: html_document
+---
+```{r}
+library(graphics)
+library(stats)
+library(utils)
+library(dplR)
+library(ggplot2)
+library(dplyr)
+
+choose.files()
+
+dome1.rwl <- read.tucson("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\Dome1\\QURU_Dome1.txt")
+head(dome1.rwl)
+
+#average multiple cores of same tree. first, try autoread.ids(file.rwl). If that doesn't work, then try stc.
+dome1.ids.percore <- read.ids(dome1.rwl, stc = c(0,4,1))
+dome1.ids.percore
+
+dome1.treeMean <- treeMean(dome1.rwl, dome1.ids.percore)
+tail(dome1.treeMean)
+
+#to find out how many trees are at this site:
+ncol(dome1.treeMean)
+
+#unlike other sites, 2015 was not removed from Dome sites since trees were sampled in the fall.
+```
+
+summary statistics
+```{r}
+#conduct summary statistics on RRW per tree (treeMean)
+dome1.treeMean.sum <- summary(dome1.treeMean)
+
+#to get mean RW, SD for RW:
+mean(dome1.treeMean.sum$mean)
+mean(dome1.treeMean.sum$year)
+min(dome1.treeMean.sum$first)
+max(dome1.treeMean.sum$last)
+mean(dome1.treeMean.sum$stdev)
+mean(dome1.treeMean.sum$median)
+mean(dome1.treeMean.sum$ar1)
+mean(interseries.cor(dome1.treeMean)[, 1])
+
+plot(dome1.treeMean, plot.type="spag")
+
+#create a new df that shows mean growth, SD (of growth), and autocorrelation for the site dome.
+dome1.summary <- data.frame(mean_growth= c(mean(dome1.treeMean.sum$mean)), 
+                            SD=c(mean(dome1.treeMean.sum$stdev)),
+                            AC=c(mean(dome1.treeMean.sum$ar1)))
+
+dome1.summary
+```
+
+
+Calculate statistics of site (incl. EPS)
+```{r}
+#read in ids based on treeMean
+dome1.ids.treeMean <- read.ids(dome1.treeMean, stc = c(0,4,1))
+dome1.ids.treeMean
+
+nrow(dome1.ids.treeMean)
+
+library(doParallel)
+
+#stats, including EPS
+dome1.rwi.stats <- rwi.stats.running(dome1.treeMean, dome1.ids.treeMean, 
+                                     window.length = 10)
+
+#check the year at which your EPS is above .85
+dome1.rwi.stats  #1920. 
+
+```
+
+Calculate BAI
+```{r}
+
+choose.files()
+dbh.dome1 <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\Dome1\\QURU_Dome1_dbh_treeavg.csv")
+head(dbh.dome1)
+
+#mean, SD of DBH
+mean(dbh.dome1$dbh..cm.)
+sd(dbh.dome1$dbh..cm.)
+
+#take the data in the second column of the data frame dbh.dome1 and multiply it by ten to go from cm to mm
+dbh.dome1 [,2] <-(dbh.dome1[,2]*10)
+head(dbh.dome1)
+
+#take the data in the second column of the data frame and replace it with the data in the second column (dbh measured in field) minus the data in the third column (the bark)
+dbh.dome1[,2] <-(dbh.dome1[, 2] - dbh.dome1[, 3])
+head(dbh.dome1)
+
+#remove the third column (since we no longer need it)
+dbh2.dome1 <- dbh.dome1[-3]
+head(dbh2.dome1)
+
+#calculate BAI per tree
+dome1.bai.treeMean <- bai.out(rwl = dome1.treeMean, diam = dbh2.dome1)  
+
+#create mean chronology (BAI)
+dome1.bai.crn <- chron(dome1.bai.treeMean, prefix = "DOM")
+tail(dome1.bai.crn)
+
+#take the data in the first column of the df and divide it by 100 to go from mm^2 to cm^2
+dome1.bai.crn [,1] <-(dome1.bai.crn [,1]/100)
+tail(dome1.bai.crn)
+
+#truncate based on EPS, which for this site was the year 1920- this is using the rownames values, not sure how to use the actual years (so rownames don't have to be counted...)
+nrow(dome1.bai.crn)
+
+dome1.bai.crn.trunc <- dome1.bai.crn [49:144,]
+head(dome1.bai.crn.trunc)
+tail(dome1.bai.crn.trunc)
+
+#rename columns to prep for creating CSV
+dome1.bai.crn.trunc <- cbind(rownames(dome1.bai.crn.trunc), dome1.bai.crn.trunc)
+rownames(dome1.bai.crn.trunc) <- NULL
+colnames(dome1.bai.crn.trunc) <- c("year","dome1_bai","dome1.s.dep")
+head(dome1.bai.crn.trunc)
+tail(dome1.bai.crn.trunc)
+
+write.csv(dome1.bai.crn.trunc, "C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\QURU Sites\\Dome1\\dome1_BAI_Trunc.csv", row.names=FALSE)
+```
+
+
+create plot
+```{r}
+#labels for x-axis:
+yr <- dome1.bai.crn.trunc [, 1]
+
+yr <- as.numeric(dome1.bai.crn.trunc [, 1])
+
+#set up frame for plot:
+plot(yr,  dome1.bai.crn.trunc [, 2],  xlab = "Year", 
+     ylab = expression(cm^2), main ="DOME1 QURU BAI" )
+
+#add BAI line:
+lines(yr, dome1.bai.crn.trunc [, 2], col = "black", lty = "solid")
+
+#add smoothing line:
+lines(yr, ffcsaps(dome1.bai.crn.trunc [, 2], nyrs = 32), col = "red", lwd = 2)
+
+head(dome1.bai.crn.trunc)
+
+#trying ggplot2- but I got a warning: ignoring unknown parameters: NA
+
+bai <- dome1.bai.crn.trunc$dome1_bai
+
+qplot(yr, bai, dome1.bai.crn.trunc, geom_line())
+
+ggplot(data = dome1.bai.crn.trunc, aes(x = yr, y = bai)) +
+geom_line(data = dome1.bai.crn.trunc, color = "black")
+
+
+#add regression line:
+
+#code from ACSA site:
+ggplot() + geom_line (data=dome1.bai.crn.trunc, aes(x=year, y=dome1_bai)) + 
+  geom_abline(intercept = -55.30537351, slope =0.03634764) +
+   theme_classic() 
+
+coef(lm(dome1_bai ~ year, data = dome1.bai.crn.trunc))
+
+```
+
