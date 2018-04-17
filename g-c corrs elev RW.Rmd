@@ -1,0 +1,904 @@
+---
+title: "g-corrs elev RW"
+author: "R Stern"
+date: "April 13, 2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+lower elev
+```{r}
+library(treeclim)
+library(dplyr)
+
+#setwd("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16")
+
+choose.files()
+low_elev.a<- read.csv( "C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Excel Files\\RW\\low_elev_sites_RWI.csv", header=T, row.names = 1)
+head(low_elev.a)
+
+low_elev <- select(low_elev.a, mean_low)
+head(low_elev)
+
+choose.files()
+precip <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\mean_PRISM_ppt_quru.csv")
+head (precip)
+
+#stationary
+#individual months
+vt.quru.precip <- dcc(low_elev, precip, 
+               selection = -6:9, method = "correlation",
+               dynamic = "static", win_size = 25, win_offset = 1,
+               start_last = TRUE, timespan = NULL, var_names = NULL, 
+               ci = 0.05,
+               boot = "std", sb = TRUE)
+
+plot(vt.quru.precip)
+coef(vt.quru.precip) # Jun (0.43), Jul(.39)
+
+#moving
+#individual months
+vt.quru.precip2 <- dcc(low_elev, precip, 
+                       selection = -6:9, method = "correlation",
+                       dynamic = "moving", win_size = 25, win_offset = 1,
+                       start_last = TRUE, var_names = NULL, ci = 0.05,
+                       boot = "std", sb = TRUE)
+
+
+summary(vt.quru.precip2)
+plot(vt.quru.precip2)  
+coef(vt.quru.precip2)
+
+#stationary
+#seasonal and water yr variables
+vt.quru.precip3 <- dcc(low_elev, precip, 
+               selection = .mean(-12:2) + .mean(3:5) 
+               + .mean(6:8) + .mean (9:11) + .mean (-9:-11) 
+               + .mean(-10:9) + .sum(-10:9),
+               method = "correlation",
+               dynamic = "static", win_size = 25, win_offset = 1,
+               start_last = TRUE, timespan = NULL, var_names = NULL, 
+               ci = 0.05,
+               boot = "std", sb = TRUE)
+plot(vt.quru.precip3)
+coef(vt.quru.precip3) #summer(.39), fall (-.28)
+
+#moving
+#seasonal and wyr
+vt.quru.precip4 <- dcc(low_elev, precip,selection = .mean(-12:2) 
+                       + .mean(3:5) + .mean(6:8)+ .mean (9:11) + .mean (-9:-11)+ .mean(-10:9) 
+                       + .sum(-10:9), 
+                       method = "correlation",dynamic = "moving", win_size = 25, 
+                       win_offset = 1, start_last = TRUE, var_names = NULL, ci = 0.05,
+                       boot = "std", sb = TRUE)
+
+plot(vt.quru.precip4)  
+coef(vt.quru.precip4)
+
+
+##tmin
+choose.files()
+
+tmin <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\mean_PRISM_tmin_quru.csv")
+head (tmin)
+
+#stationary
+#individual months
+vt.quru.tmin <- dcc(low_elev, tmin, selection = -6:9, method = "correlation",
+                    dynamic = "static", win_size = 25, win_offset = 1,
+                    start_last = TRUE, timespan = NULL, var_names = NULL, 
+                    ci = 0.05,
+                    boot = "std", sb = TRUE)
+
+plot(vt.quru.tmin) 
+coef(vt.quru.tmin) #Oct (.25)
+
+#moving
+vt.quru.tmin2 <- dcc(low_elev, tmin, selection = -6:9, method = "correlation",
+                    dynamic = "moving", win_size = 25, win_offset = 1,
+                    start_last = TRUE, timespan = NULL, var_names = NULL, 
+                    ci = 0.05,
+                    boot = "std", sb = TRUE)
+
+plot(vt.quru.tmin2) 
+
+#stationary
+#seasonal and Wyr 
+vt.quru.tmin3 <- dcc(low_elev, tmin, selection = .mean(-12:2) 
+                       + .mean(3:5) + .mean(6:8)
+                       + .mean (9:11) + .mean (-9:-11) + .mean(-10:9) 
+                     + .sum(-10:9), method = "correlation",
+                    dynamic = "static", win_size = 25, win_offset = 1,
+                    start_last = TRUE, timespan = NULL, var_names = NULL, 
+                    ci = 0.05, boot = "std", sb = TRUE)
+
+plot(vt.quru.tmin3) #none sig
+
+#moving
+#seasonal and Wyr 
+vt.quru.tmin4 <- dcc(low_elev, tmin, selection = .mean(-12:2) 
+                       + .mean(3:5) + .mean(6:8)
+                       + .mean (9:11) + .mean (-9:-11) + .mean(-10:9) 
+                     + .sum(-10:9), method = "correlation",
+                    dynamic = "moving", win_size = 25, win_offset = 1,
+                    start_last = TRUE, timespan = NULL, var_names = NULL, 
+                    ci = 0.05, boot = "std", sb = TRUE)
+
+plot(vt.quru.tmin4) 
+
+##tmean
+choose.files()
+tmean <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\mean_PRISM_tmean_quru.csv")
+head (tmean)
+
+#stationary
+#inidividual months
+vt.quru.tmean<- dcc(low_elev, tmean,selection = -6:9, method = "correlation",
+                       dynamic = "static", win_size = 25, win_offset = 1,
+                    start_last = TRUE, timespan = NULL, var_names = NULL, 
+                    ci = 0.05, boot = "std", sb = TRUE)
+
+plot(vt.quru.tmean) 
+coef(vt.quru.tmean) # oct (.27), Jun(-.24)
+
+#moving
+vt.quru.tmean2 <- dcc(low_elev, tmean, selection = -6:9, method ="correlation",
+                       dynamic = "moving", win_size = 25, win_offset = 1,
+                    start_last = TRUE, timespan = NULL, var_names = NULL, 
+                    ci = 0.05, boot = "std", sb = TRUE)
+
+plot(vt.quru.tmean2) 
+coef(vt.quru.tmean2) 
+
+#static
+#seasonal, Wyr
+vt.quru.tmean3 <- dcc(low_elev, tmean,selection = .mean(-12:2) 
+                       + .mean(3:5) + .mean(6:8) + .mean (9:11) + .mean (-9:-11) 
+                      + .mean(-10:9)  + .sum(-10:9), method = "correlation",
+                       dynamic = "static", win_size = 25, win_offset = 1,
+                    start_last = TRUE, timespan = NULL, var_names = NULL, ci = 0.05,
+                    boot = "std", sb = TRUE)
+
+plot(vt.quru.tmean3) #none sig
+coef(vt.quru.tmean3) 
+
+#moving
+#seasonal and Wyr
+vt.quru.tmean4<- dcc(low_elev, tmean,selection =  .mean(-12:2) 
+                       + .mean(3:5) + .mean(6:8)
+                       + .mean (9:11) + .mean (-9:-11), method = "correlation",
+                       dynamic = "static", win_size = 25, win_offset = 1,
+                    start_last = TRUE, timespan = NULL, var_names = NULL, ci = 0.05,
+                    boot = "std", sb = TRUE)
+
+plot(vt.quru.tmean4) 
+coef(vt.quru.tmean4) 
+
+##tmax
+choose.files()
+tmax <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\mean_PRISM_tmax_quru.csv")
+head (tmax)
+
+#Correlation function analysis (stationary):
+#individual months
+vt.quru.tmax <- dcc(low_elev, tmax, 
+               selection = -6:9, method = "correlation",
+               dynamic = "static", win_size = 25, win_offset = 1,
+               start_last = TRUE, timespan = NULL, var_names = NULL, 
+               ci = 0.05,
+               boot = "std", sb = TRUE)
+
+plot(vt.quru.tmax)
+coef(vt.quru.tmax) #pJun(.26), Jun(-.35)
+
+#moving
+#individual months
+vt.quru.tmax2 <- dcc(low_elev, tmax, 
+                       selection = -6:9, method = "correlation",
+                       dynamic = "moving", win_size = 25, win_offset = 1,
+                       start_last = TRUE, var_names = NULL, ci = 0.05,
+                       boot = "std", sb = TRUE)
+plot(vt.quru.tmax2)  
+coef(vt.quru.tmax2)
+
+#seasonal and water yr variables
+vt.quru.tmax3 <- dcc(low_elev, tmax, 
+               selection = .mean(-12:2) + .mean(3:5) 
+               + .mean(6:8) + .mean (9:11) + .mean (-9:-11) 
+               + .mean(-10:9) + .sum(-10:9),
+               method = "correlation",
+               dynamic = "static", win_size = 25, win_offset = 1,
+               start_last = TRUE, timespan = NULL, var_names = NULL, 
+               ci = 0.05,
+               boot = "std", sb = TRUE)
+plot(vt.quru.tmax3)
+coef(vt.quru.tmax3) #summer(-.26)
+
+#seasonal and wyr
+vt.quru.tmax4 <- dcc(low_elev, tmax, 
+                       selection = .mean(-12:2) 
+                       + .mean(3:5) + .mean(6:8)
+                       + .mean (9:11) + .mean (-9:-11)+ .mean(-10:9) 
+                       + .sum(-10:9), 
+                       method = "correlation",
+                       dynamic = "moving", win_size = 25, 
+                       win_offset = 1,
+                       start_last = TRUE, var_names = NULL, ci = 0.05,
+                       boot = "std", sb = TRUE)
+plot(vt.quru.tmax4)  
+coef(vt.quru.tmax4)
+
+##SPEI
+choose.files()
+spei_01 <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\mean_spei_01.csv")
+head (spei_01)
+
+vt.quru.spei.01 <- dcc(low_elev, spei_01, selection = -6:9, 
+                       method =  "correlation",
+                  dynamic = "static", win_size = 25, win_offset = 1,
+                 start_last = TRUE, timespan = NULL, var_names = NULL, 
+                 ci = 0.05,
+                 boot = "std", sb = TRUE)
+
+plot(vt.quru.spei.01) #Jun(.42), Jul(.38)
+coef(vt.quru.spei.01)
+
+#SPEI03
+spei_03 <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\mean_spei_03.csv")
+head (spei_03)
+
+vt.quru.spei.03 <- dcc(low_elev, spei_03, selection = -6:9, 
+                       method =  "correlation", dynamic = "static",
+                       win_size = 25, win_offset = 1, 
+                       start_last = TRUE,  var_names = NULL, 
+                        ci = 0.05, boot = "std", sb = TRUE)
+
+plot(vt.quru.spei.03) 
+coef(vt.quru.spei.03) #pJun(-.24), Jun(.34), JUl(.46), Aug(.36)
+
+#SPEI06
+spei_06 <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\mean_spei_06.csv")
+head(spei_06)
+
+vt.quru.spei.06 <- dcc(low_elev, spei_06, selection = -6:9, 
+                       method =    "correlation",
+                  dynamic = "static", win_size = 25, win_offset = 1,
+                 start_last = TRUE, timespan = NULL, var_names = NULL, 
+                 ci = 0.05,
+                 boot = "std", sb = TRUE)
+
+plot(vt.quru.spei.06) 
+coef(vt.quru.spei.06) #pJun(-.23), pDec(.22), Jan(.22), Jun(.23), Jul(.33), Aug(.31), Sep.(.26)
+
+#SPEI09
+choose.files()
+spei_09 <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\mean_spei_09.csv")
+head(spei_09)
+
+vt.quru.spei.09 <- dcc(low_elev, spei_09, selection = -9:9, 
+                       method =    "correlation",
+                  dynamic = "static", win_size = 25, win_offset = 1,
+                 start_last = TRUE, timespan = NULL, var_names = NULL, 
+                 ci = 0.05,
+                 boot = "std", sb = TRUE)
+
+plot(vt.quru.spei.09) 
+coef(vt.quru.spei.09) #Jul(.32), Aug(.24)
+
+
+##PDSI
+choose.files()
+pdsi <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\PDSI VT Division 2.csv")
+head(pdsi)
+
+#static
+vt.quru.pdsi <- dcc(low_elev, pdsi, selection = -6:9, 
+                       method =    "correlation", dynamic = "static",
+                       win_size = 25, win_offset = 1,
+                       start_last = TRUE, timespan = NULL, 
+                       var_names = NULL, ci = 0.05, boot = "std", 
+                    sb = TRUE)
+
+plot(vt.quru.pdsi) 
+coef(vt.quru.pdsi) #Jun(.31), Jul(.38), Aug(.28)
+
+#moving
+vt.quru.pdsi2 <- dcc(low_elev, pdsi, selection = -6:9, 
+                       method =    "correlation", dynamic = "moving",
+                       win_size = 25, win_offset = 1,
+                       start_last = TRUE, timespan = NULL, 
+                       var_names = NULL, ci = 0.05, boot = "std", 
+                    sb = TRUE)
+
+plot(vt.quru.pdsi2) 
+coef(vt.quru.pdsi2)
+
+#HDD
+choose.files()
+hdd <- read.csv( "C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\HDD VT Division 2.csv")
+head(hdd)
+
+#static
+vt.quru.hdd <- dcc(low_elev, hdd, selection = -6:9,
+                       method =    "correlation", 
+                   dynamic = "static",
+                       win_size = 25, win_offset = 1,
+                       start_last = TRUE, timespan = NULL, 
+                       var_names = NULL, ci = 0.05, boot = "std", 
+                    sb = TRUE)
+
+plot(vt.quru.hdd) 
+coef(vt.quru.hdd) #pJun(-.22), pOct(-.28), Jun(.24)
+
+#moving
+vt.quru.hdd2 <- dcc(low_elev, hdd, selection = -6:9, 
+                       method =    "correlation", dynamic = "moving",
+                       win_size = 25, win_offset = 1,
+                       start_last = TRUE, timespan = NULL, 
+                       var_names = NULL, ci = 0.05, boot = "std", 
+                    sb = TRUE)
+
+plot(vt.quru.hdd2) 
+coef(vt.quru.hdd2)
+
+
+#CDD
+choose.files()
+cdd <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\CDD VT Division 2.csv")
+head(cdd)
+tail(cdd)
+
+#static
+vt.quru.cdd <- dcc(low_elev, cdd, selection = .range(-5:-9) + .range(5:9) + .mean(6:8) + .sum(6:8), 
+                       method =  "correlation", 
+                       dynamic = "static",
+                       win_size = 25, win_offset = 1,
+                       start_last = TRUE, timespan = NULL, 
+                       var_names = NULL, ci = 0.05, boot = "std", sb = TRUE)
+
+plot(vt.quru.cdd) 
+coef(vt.quru.cdd) #none sig
+
+#moving- error here
+vt.quru.cdd2 <- dcc(low_elev, cdd, selection = .range(-6:-9) + .range(6:9), 
+                       method = "correlation", dynamic = "moving",
+                       win_size = 25, win_offset = 1,
+                       start_last = TRUE, timespan = NULL, 
+                       var_names = NULL, ci = 0.05, boot = "std", 
+                    sb = TRUE)
+
+plot(vt.quru.cdd2) 
+coef(vt.quru.cdd2)
+
+##NADP
+choose.files()
+nadp <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\Climate, Dep Data\\NADP\\mean NADP all vars.csv")
+head(nadp)
+tail(nadp)
+
+#individual months, prev year (-6:-12)
+vt.quru.nadp <- dcc(low_elev, nadp, 
+               selection = -6:-12, method = "correlation",
+               dynamic = "static", win_size = 25, win_offset = 1,
+               start_last = TRUE, timespan = NULL, var_names = NULL, 
+               ci = 0.05,
+               boot = "std", sb = TRUE)
+
+plot(vt.quru.nadp)
+coef(vt.quru.nadp) #NO3 pJun(-.41), NO3 pDec(-.32), SO4 pJun(-.37), SO4 pDec(-.29)
+
+#individual months, current year winter spring (1:6)
+vt.quru.nadp2 <- dcc(low_elev, nadp, 
+               selection = 1:6, method = "correlation",
+               dynamic = "static", win_size = 25, win_offset = 1,
+               start_last = TRUE, timespan = NULL, var_names = NULL, 
+               ci = 0.05,
+               boot = "std", sb = TRUE)
+
+plot(vt.quru.nadp2)
+coef(vt.quru.nadp2)# NO3 Apr(-.26), c.a.ratio Jan(.32), SO4 Feb (-.34)
+
+#individual months, current year summer fall (7:10)
+vt.quru.nadp3 <- dcc(low_elev, nadp, 
+               selection = 7:10, method = "correlation",
+               dynamic = "static", win_size = 25, win_offset = 1,
+               start_last = TRUE, timespan = NULL, var_names = NULL, 
+               ci = 0.05,
+               boot = "std", sb = TRUE)
+
+plot(vt.quru.nadp3)
+coef(vt.quru.nadp3) # NO3 Jul(-.25), c.a.ratio Jul (-.31)
+
+#water year mean and sum
+vt.quru.nadp4 <- dcc(low_elev, nadp,  selection = .mean(-10:9) +.sum(-10:9), 
+                       method = "correlation",
+                       dynamic = "static", win_size = 25, win_offset = 1,
+                       start_last = TRUE, var_names = NULL, ci = 0.05,
+                       boot = "std", sb = TRUE)
+
+plot(vt.quru.nadp4) 
+coef(vt.quru.nadp4) #NO3 Wyr mean and sum(-.29), SO4 Wyr mean and sum(-.49)
+
+#seasonal 
+vt.quru.nadp5 <- dcc(low_elev, nadp,  selection = .mean(-12:2) 
+                       + .mean(3:5) + .mean(6:8) + .mean (9:11) + .mean (-9:-11), 
+                       method = "correlation",
+                       dynamic = "static", win_size = 25, win_offset = 1,
+                       start_last = TRUE, var_names = NULL, ci = 0.05,
+                       boot = "std", sb = TRUE)
+
+plot(vt.quru.nadp5) 
+coef(vt.quru.nadp5) #NO3 winter(-.35), SO4 winter (-.34)
+
+##CO2
+choose.files()
+quru.co2.low_elev  <- read.csv( "C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Excel Files\\RW\\co2_low_elev_quru.csv")
+head(quru.co2.low_elev)
+
+qx <- quru.co2.low_elev$mean_low
+qy <- quru.co2.low_elev$mean_CO2
+
+#Correlation:
+cor.test(qx,qy, method = "pearson", data=quru.co2.low_elev, na.omit=TRUE) #ns, results below
+```
+Pearson's product-moment correlation
+
+data:  qx and qy
+t = 0.27092, df = 78, p-value = 0.7872
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.1903382  0.2487024
+sample estimates:
+       cor 
+0.03066096 
+
+Higher elev
+```{r}
+library(treeclim)
+
+#setwd("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16")
+
+choose.files()
+high_elev.a<- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Excel Files\\RW\\high_elev_sites_RWI.csv", header=T, row.names = 1)
+head(high_elev.a)
+
+high_elev <- select(high_elev.a, mean_high)
+head(high_elev)
+
+choose.files()
+precip <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\mean_PRISM_ppt_quru.csv")
+head (precip)
+
+#stationary
+#individual months
+vt.h.e.precip <- dcc(high_elev, precip, 
+               selection = -6:9, method = "correlation",
+               dynamic = "static", win_size = 25, win_offset = 1,
+               start_last = TRUE, timespan = NULL, var_names = NULL, 
+               ci = 0.05,
+               boot = "std", sb = TRUE)
+
+plot(vt.h.e.precip)
+coef(vt.h.e.precip) # pSep(.23), Jun(.33), Jul(.34)
+
+#moving
+#individual months
+vt.h.e.precip2 <- dcc(high_elev, precip, 
+                       selection = -6:9, method = "correlation",
+                       dynamic = "moving", win_size = 25, win_offset = 1,
+                       start_last = TRUE, var_names = NULL, ci = 0.05,
+                       boot = "std", sb = TRUE)
+
+
+summary(vt.h.e.precip2)
+plot(vt.h.e.precip2)  
+coef(vt.h.e.precip2)
+
+#stationary
+#seasonal and water yr variables
+vt.h.e.precip3 <- dcc(high_elev, precip, 
+               selection = .mean(-12:2) + .mean(3:5) 
+               + .mean(6:8) + .mean (9:11) + .mean (-9:-11) 
+               + .mean(-10:9) + .sum(-10:9),
+               method = "correlation",
+               dynamic = "static", win_size = 25, win_offset = 1,
+               start_last = TRUE, timespan = NULL, var_names = NULL, 
+               ci = 0.05,
+               boot = "std", sb = TRUE)
+plot(vt.h.e.precip3)
+coef(vt.h.e.precip3) #summer(.37)
+
+#moving
+#seasonal and wyr
+vt.h.e.precip4 <- dcc(high_elev, precip,selection = .mean(-12:2) 
+                       + .mean(3:5) + .mean(6:8)+ .mean (9:11) + .mean (-9:-11)+ .mean(-10:9) 
+                       + .sum(-10:9), 
+                       method = "correlation",dynamic = "moving", win_size = 25, 
+                       win_offset = 1, start_last = TRUE, var_names = NULL, ci = 0.05,
+                       boot = "std", sb = TRUE)
+
+plot(vt.h.e.precip4)  
+coef(vt.h.e.precip4)
+
+
+##tmin
+choose.files()
+
+tmin <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\mean_PRISM_tmin_quru.csv")
+head (tmin)
+
+#stationary
+#individual months
+vt.h.e.tmin <- dcc(high_elev, tmin, selection = -6:9, method = "correlation",
+                    dynamic = "static", win_size = 25, win_offset = 1,
+                    start_last = TRUE, timespan = NULL, var_names = NULL, 
+                    ci = 0.05,
+                    boot = "std", sb = TRUE)
+
+plot(vt.h.e.tmin) #Aug(.28)
+coef(vt.h.e.tmin)
+
+#moving
+vt.h.e.tmin2 <- dcc(high_elev, tmin, selection = -6:9, method = "correlation",
+                    dynamic = "moving", win_size = 25, win_offset = 1,
+                    start_last = TRUE, timespan = NULL, var_names = NULL, 
+                    ci = 0.05,
+                    boot = "std", sb = TRUE)
+
+plot(vt.h.e.tmin2) 
+
+#stationary
+#seasonal and Wyr 
+vt.h.e.tmin3 <- dcc(high_elev, tmin, selection = .mean(-12:2) 
+                       + .mean(3:5) + .mean(6:8)
+                       + .mean (9:11) + .mean (-9:-11) + .mean(-10:9) 
+                     + .sum(-10:9), method = "correlation",
+                    dynamic = "static", win_size = 25, win_offset = 1,
+                    start_last = TRUE, timespan = NULL, var_names = NULL, 
+                    ci = 0.05, boot = "std", sb = TRUE)
+
+plot(vt.h.e.tmin3) #NS
+
+#moving
+#seasonal and Wyr 
+vt.h.e.tmin4 <- dcc(high_elev, tmin, selection = .mean(-12:2) 
+                       + .mean(3:5) + .mean(6:8)
+                       + .mean (9:11) + .mean (-9:-11) + .mean(-10:9) 
+                     + .sum(-10:9), method = "correlation",
+                    dynamic = "moving", win_size = 25, win_offset = 1,
+                    start_last = TRUE, timespan = NULL, var_names = NULL, 
+                    ci = 0.05, boot = "std", sb = TRUE)
+
+plot(vt.h.e.tmin4) 
+
+##tmean
+choose.files()
+tmean <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\mean_PRISM_tmean_quru.csv")
+head (tmean)
+
+#stationary
+#inidividual months
+vt.h.e.tmean<- dcc(high_elev, tmean,selection = -6:9, method = "correlation",
+                       dynamic = "static", win_size = 25, win_offset = 1,
+                    start_last = TRUE, timespan = NULL, var_names = NULL, 
+                    ci = 0.05, boot = "std", sb = TRUE)
+
+plot(vt.h.e.tmean) 
+coef(vt.h.e.tmean) #Jun(-.25), Aug(.25)
+
+#moving
+vt.h.e.tmean2 <- dcc(high_elev, tmean, selection = -6:9, method ="correlation",
+                       dynamic = "moving", win_size = 25, win_offset = 1,
+                    start_last = TRUE, timespan = NULL, var_names = NULL, 
+                    ci = 0.05, boot = "std", sb = TRUE)
+
+plot(vt.h.e.tmean2) 
+coef(vt.h.e.tmean2) 
+
+#static
+#seasonal, Wyr
+vt.h.e.tmean3 <- dcc(high_elev, tmean,selection = .mean(-12:2) 
+                       + .mean(3:5) + .mean(6:8) + .mean (9:11) + .mean (-9:-11) 
+                      + .mean(-10:9)  + .sum(-10:9), method = "correlation",
+                       dynamic = "static", win_size = 25, win_offset = 1,
+                    start_last = TRUE, timespan = NULL, var_names = NULL, ci = 0.05,
+                    boot = "std", sb = TRUE)
+
+plot(vt.h.e.tmean3) #NS
+coef(vt.h.e.tmean3) 
+
+#moving
+#seasonal and Wyr
+vt.h.e.tmean4<- dcc(high_elev, tmean,selection =  .mean(-12:2) 
+                       + .mean(3:5) + .mean(6:8)
+                       + .mean (9:11) + .mean (-9:-11), method = "correlation",
+                       dynamic = "static", win_size = 25, win_offset = 1,
+                    start_last = TRUE, timespan = NULL, var_names = NULL, ci = 0.05,
+                    boot = "std", sb = TRUE)
+
+plot(vt.h.e.tmean4) 
+coef(vt.h.e.tmean4) 
+
+##tmax
+choose.files()
+tmax <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\mean_PRISM_tmax_quru.csv")
+head (tmax)
+
+#Correlation function analysis (stationary):
+#individual months
+vt.h.e.tmax <- dcc(high_elev, tmax, 
+               selection = -6:9, method = "correlation",
+               dynamic = "static", win_size = 25, win_offset = 1,
+               start_last = TRUE, timespan = NULL, var_names = NULL, 
+               ci = 0.05,
+               boot = "std", sb = TRUE)
+
+plot(vt.h.e.tmax)
+coef(vt.h.e.tmax) #Jun(-.36)
+
+#moving
+#individual months
+vt.h.e.tmax2 <- dcc(high_elev, tmax, 
+                       selection = -6:9, method = "correlation",
+                       dynamic = "moving", win_size = 25, win_offset = 1,
+                       start_last = TRUE, var_names = NULL, ci = 0.05,
+                       boot = "std", sb = TRUE)
+plot(vt.h.e.tmax2)  
+coef(vt.h.e.tmax2)
+
+#seasonal and water yr variables
+vt.h.e.tmax3 <- dcc(high_elev, tmax, 
+               selection = .mean(-12:2) + .mean(3:5) 
+               + .mean(6:8) + .mean (9:11) + .mean (-9:-11) 
+               + .mean(-10:9) + .sum(-10:9),
+               method = "correlation",
+               dynamic = "static", win_size = 25, win_offset = 1,
+               start_last = TRUE, timespan = NULL, var_names = NULL, 
+               ci = 0.05,
+               boot = "std", sb = TRUE)
+plot(vt.h.e.tmax3)
+coef(vt.h.e.tmax3) #NS
+
+#seasonal and wyr
+vt.h.e.tmax4 <- dcc(high_elev, tmax, 
+                       selection = .mean(-12:2) 
+                       + .mean(3:5) + .mean(6:8)
+                       + .mean (9:11) + .mean (-9:-11)+ .mean(-10:9) 
+                       + .sum(-10:9), 
+                       method = "correlation",
+                       dynamic = "moving", win_size = 25, 
+                       win_offset = 1,
+                       start_last = TRUE, var_names = NULL, ci = 0.05,
+                       boot = "std", sb = TRUE)
+plot(vt.h.e.tmax4)  
+coef(vt.h.e.tmax4)
+
+##SPEI
+choose.files()
+spei_01 <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\mean_spei_01.csv")
+head (spei_01)
+
+vt.h.e.spei.01 <- dcc(high_elev, spei_01, selection = -6:9, 
+                       method =  "correlation",
+                  dynamic = "static", win_size = 25, win_offset = 1,
+                 start_last = TRUE, timespan = NULL, var_names = NULL, 
+                 ci = 0.05,
+                 boot = "std", sb = TRUE)
+
+plot(vt.h.e.spei.01) #pSep(.25), Jun(.34), Jul (.25)
+coef(vt.h.e.spei.01)
+
+#SPEI03
+spei_03 <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\mean_spei_03.csv")
+head (spei_03)
+
+vt.h.e.spei.03 <- dcc(high_elev, spei_03, selection = -6:9, 
+                       method =  "correlation", dynamic = "static",
+                       win_size = 25, win_offset = 1, 
+                       start_last = TRUE,  var_names = NULL, 
+                        ci = 0.05, boot = "std", sb = TRUE)
+
+plot(vt.h.e.spei.03) #pSep(.27), Jun(.26), Jul(.28)
+coef(vt.h.e.spei.03)
+
+#SPEI06
+spei_06 <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\mean_spei_06.csv")
+head(spei_06)
+
+vt.h.e.spei.06 <- dcc(high_elev, spei_06, selection = -6:9, 
+                       method =    "correlation",
+                  dynamic = "static", win_size = 25, win_offset = 1,
+                 start_last = TRUE, timespan = NULL, var_names = NULL, 
+                 ci = 0.05,
+                 boot = "std", sb = TRUE)
+
+plot(vt.h.e.spei.06) #pDec(.23), Jan(.23), Jul(.24), Aug(.24), Sep(.22)
+coef(vt.h.e.spei.06)
+
+#SPEI09
+choose.files()
+spei_09 <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\mean_spei_09.csv")
+head(spei_09)
+
+vt.h.e.spei.09 <- dcc(high_elev, spei_09, selection = -9:9, 
+                       method =    "correlation",
+                  dynamic = "static", win_size = 25, win_offset = 1,
+                 start_last = TRUE, timespan = NULL, var_names = NULL, 
+                 ci = 0.05,
+                 boot = "std", sb = TRUE)
+
+plot(vt.h.e.spei.09) #Jul(.24)
+coef(vt.h.e.spei.09)
+
+
+##PDSI
+choose.files()
+pdsi <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\PDSI VT Division 2.csv")
+head(pdsi)
+
+#static
+vt.h.e.pdsi <- dcc(high_elev, pdsi, selection = -6:9, 
+                       method =    "correlation", dynamic = "static",
+                       win_size = 25, win_offset = 1,
+                       start_last = TRUE, timespan = NULL, 
+                       var_names = NULL, ci = 0.05, boot = "std", 
+                    sb = TRUE)
+
+plot(vt.h.e.pdsi) 
+coef(vt.h.e.pdsi)#Jun(.27), Jul(.33), Aug(.26), Sep(.23)
+
+#moving
+vt.h.e.pdsi2 <- dcc(high_elev, pdsi, selection = -6:9, 
+                       method =    "correlation", dynamic = "moving",
+                       win_size = 25, win_offset = 1,
+                       start_last = TRUE, timespan = NULL, 
+                       var_names = NULL, ci = 0.05, boot = "std", 
+                    sb = TRUE)
+
+plot(vt.h.e.pdsi2) 
+coef(vt.h.e.pdsi2)
+
+#HDD
+choose.files()
+hdd <- read.csv( "C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\HDD VT Division 2.csv")
+head(hdd)
+
+#static
+vt.h.e.hdd <- dcc(high_elev, hdd, selection = -6:9,
+                       method =    "correlation", 
+                   dynamic = "static",
+                       win_size = 25, win_offset = 1,
+                       start_last = TRUE, timespan = NULL, 
+                       var_names = NULL, ci = 0.05, boot = "std", 
+                    sb = TRUE)
+
+plot(vt.h.e.hdd) 
+coef(vt.h.e.hdd) #Jun(.25), Aug(-.24)
+
+#moving
+vt.h.e.hdd2 <- dcc(high_elev, hdd, selection = -6:9, 
+                       method =    "correlation", dynamic = "moving",
+                       win_size = 25, win_offset = 1,
+                       start_last = TRUE, timespan = NULL, 
+                       var_names = NULL, ci = 0.05, boot = "std", 
+                    sb = TRUE)
+
+plot(vt.h.e.hdd2) 
+coef(vt.h.e.hdd2)
+
+
+#CDD
+choose.files()
+cdd <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Climate data\\CDD VT Division 2.csv")
+head(cdd)
+tail(cdd)
+
+#static
+vt.h.e.cdd <- dcc(high_elev, cdd, selection = .range(-5:-9) + .range(5:9) + .mean(6:8) + .sum(6:8), 
+                       method =  "correlation", 
+                       dynamic = "static",
+                       win_size = 25, win_offset = 1,
+                       start_last = TRUE, timespan = NULL, 
+                       var_names = NULL, ci = 0.05, boot = "std", sb = TRUE)
+
+plot(vt.h.e.cdd) 
+coef(vt.h.e.cdd) #Jun(-.27), Aug(.26)
+
+#moving- error here
+vt.h.e.cdd2 <- dcc(high_elev, cdd, selection = .range(-6:-9) + .range(6:9), 
+                       method = "correlation", dynamic = "moving",
+                       win_size = 25, win_offset = 1,
+                       start_last = TRUE, timespan = NULL, 
+                       var_names = NULL, ci = 0.05, boot = "std", 
+                    sb = TRUE)
+
+plot(vt.h.e.cdd2) 
+coef(vt.h.e.cdd2)
+
+##NADP
+choose.files()
+nadp <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\Climate, Dep Data\\NADP\\mean NADP all vars.csv")
+head(nadp)
+tail(nadp)
+
+plot(Mean_Ratio_c.a ~Year, data= nadp)
+
+plot(Mean_NO3 ~Year, data= nadp)
+
+#individual months, prev year (-6:-12)
+vt.h.e.nadp <- dcc(high_elev, nadp, 
+               selection = -6:-12, method = "correlation",
+               dynamic = "static", win_size = 25, win_offset = 1,
+               start_last = TRUE, timespan = NULL, var_names = NULL, 
+               ci = 0.05,
+               boot = "std", sb = TRUE)
+
+plot(vt.h.e.nadp)
+coef(vt.h.e.nadp) #SO4 pAug(-.34), SO4 pNov(-.28)
+
+#individual months, current year winter spring (1:6)
+vt.h.e.nadp2 <- dcc(high_elev, nadp, 
+               selection = 1:6, method = "correlation",
+               dynamic = "static", win_size = 25, win_offset = 1,
+               start_last = TRUE, timespan = NULL, var_names = NULL, 
+               ci = 0.05,
+               boot = "std", sb = TRUE)
+
+plot(vt.h.e.nadp2)
+coef(vt.h.e.nadp2) #NS
+
+#individual months, current year summer fall (7:10)
+vt.h.e.nadp3 <- dcc(high_elev, nadp, 
+               selection = 7:10, method = "correlation",
+               dynamic = "static", win_size = 25, win_offset = 1,
+               start_last = TRUE, timespan = NULL, var_names = NULL, 
+               ci = 0.05,
+               boot = "std", sb = TRUE)
+
+plot(vt.h.e.nadp3)
+coef(vt.h.e.nadp3) #NS
+
+#water year mean and sum
+vt.h.e.nadp4 <- dcc(high_elev, nadp,  selection = .mean(-10:9) +.sum(-10:9), 
+                       method = "correlation",
+                       dynamic = "static", win_size = 25, win_offset = 1,
+                       start_last = TRUE, var_names = NULL, ci = 0.05,
+                       boot = "std", sb = TRUE)
+
+plot(vt.h.e.nadp4) 
+coef(vt.h.e.nadp4) #NS
+
+#seasonal 
+vt.h.e.nadp5 <- dcc(high_elev, nadp,  selection = .mean(-12:2) 
+                       + .mean(3:5) + .mean(6:8) + .mean (9:11) + .mean (-9:-11), 
+                       method = "correlation",
+                       dynamic = "static", win_size = 25, win_offset = 1,
+                       start_last = TRUE, var_names = NULL, ci = 0.05,
+                       boot = "std", sb = TRUE)
+
+plot(vt.h.e.nadp5) 
+coef(vt.h.e.nadp5) #NS
+
+##CO2
+choose.files()
+quru.co2.high_elev  <- read.csv("C:\\Users\\Rebecca Stern\\Documents\\UVM\\Research\\QURU 2015-16\\Excel Files\\RW\\co2_high_elev_quru.csv")
+head(quru.co2.high_elev)
+
+qx <- quru.co2.high_elev$mean_high
+qy <- quru.co2.high_elev$mean_CO2
+
+#Correlation:
+cor.test(qx,qy, method = "pearson", data=quru.co2.high_elev, na.omit=TRUE) #ns, results below
+```
+
+Pearson's product-moment correlation
+
+data:  qx and qy
+t = 0.11405, df = 78, p-value = 0.9095
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.2073929  0.2319711
+sample estimates:
+       cor 
+0.01291235 
